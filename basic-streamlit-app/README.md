@@ -1,1 +1,3 @@
-# Streamlit is open source framework where one can build and share code
+- Streamlit is open source framework where one can build and share code
+- main.py is a project that I am working on to show basketball player stats across different seasons
+- Week 3 and Week 4 files are for work that I did in my Elements of Computing II class
