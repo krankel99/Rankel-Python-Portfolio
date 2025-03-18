@@ -1,6 +1,7 @@
 # Projects
 ## Basketball Stats
-Under basic-streamlit-app is a file called main.py which contains basketball stats for players from the 1996 season until the 2022 season.
+Under basic-streamlit-app is a file called main.py which contains basketball stats for players from the 1996 season until the 2022 season. In this project, I worked with cleaning the data by converting height and weight from centimeters and kilograms into inches and pounds respectively. In doing so, I was able to interpret the data clearer. I created different filters like one for different seasons and one for different teams so one could analyze the data based on each of these factors. I created two visualizations that change based on the filter as well which are the points per game for the season and the average number of points per age.
+- [https://github.com/krankel99/Rankel-Python-Portfolio/blob/main/basic-streamlit-app/main.py](url)
 ## Olympic Medal Count for the 2008 Olympics
 Under TidyData-Project is a filed called tidy_data_project which contains the count for olympic medals from the 2008 Olympics in Beijing. In this project, I worked with cleaning up data including dropping NaN values, melting data from "wide" into "long" format, and splitting columns. I show two visualizations, a barplot that shows the top 10 medal breakdown by sports and a pie chart that shows the breakdown of medals by gender. This how complemented my overall portfolio as it shows that I am able to transform data and clean it up so I can create visualizations with it which is extremely useful in the real world. 
 - [https://github.com/krankel99/Rankel-Python-Portfolio/tree/main/TidyData-Project](url)
