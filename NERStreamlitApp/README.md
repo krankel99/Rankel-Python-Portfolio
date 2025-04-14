@@ -13,7 +13,13 @@ This app leverages spaCy's EntityRuler, which allows users to define rule-based 
 
 **Instant Feedback**: Apply patterns and immediately view detected entities.
 
-**Clear and Reusable**: Easily clear all patterns and try new ones on the fly.
+**Clear and Reusable**: Easily clear all patterns and try new ones all with the push of a button.
 ### References
+SpaCy Library Architect: [https://spacy.io/api](url)
 
+The Basics of spaCy: [https://spacy.pythonhumanities.com/01_01_install_and_containers.html](url)
+
+SpaCy and its Linguistic Annotations: [https://spacy.pythonhumanities.com/01_02_linguistic_annotations.html](url)
+
+Using SpaCy's EntityRuler: [https://spacy.pythonhumanities.com/02_01_entityruler.html](url)
 ### Visual Examples
