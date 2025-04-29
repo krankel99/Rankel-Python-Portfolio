@@ -13,7 +13,7 @@ Download "python -m spacy download en_core_web_sm" for spaCy's English model.
 
 Streamlit run app.py
 
-Local host: [http://localhost:8501/](url)
+[[Local host: [http://localhost:8501/](url)](https://rankel-python-portfolio-fjaypphs96jea4q6tqqclo.streamlit.app/)](url)
 ### App Features
 **Flexible Text Input**: Upload, paste or type any text you'd like to analyze.
 
