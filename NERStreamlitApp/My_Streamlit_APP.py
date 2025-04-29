@@ -1,7 +1,7 @@
 # import the necessary libraries and packages
 import pandas as pd
 import streamlit as st
-from spacy.pipeline import EntityRuler
+from spacy.pipeline import entityruler
 import spacy
 from spacy import displacy
 
