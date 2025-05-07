@@ -29,7 +29,7 @@ def fetch_prices(tickers):
             prices[t] = np.nan
     return prices
 
-# Default portfolio initialization
+# Initialize default portfolio
 if 'portfolio_df' not in st.session_state:
     df0 = pd.DataFrame({
         'Ticker': ['AAPL', 'MSFT', 'GOOG'],
@@ -89,7 +89,7 @@ if page == "Homepage":
 elif page == "Portfolio Overview":
     st.header("Portfolio Overview")
     df = st.session_state['portfolio_df']
-    # Compute key metrics
+    # Key metrics
     total_cost = df['Cost Basis'].sum()
     total_value = df['Current Value'].sum()
     pnl_pct = ((total_value - total_cost) / total_cost) * 100 if total_cost else 0
@@ -100,7 +100,7 @@ elif page == "Portfolio Overview":
     port_returns = (returns * weights.values).sum(axis=1)
     sharpe = (port_returns.mean() / port_returns.std()) * np.sqrt(252)
 
-    # Layout: holdings table and metrics
+    # Layout: holdings & metrics
     tcol, mcol = st.columns([3,1])
     with tcol:
         st.subheader("Holdings")
@@ -119,7 +119,7 @@ elif page == "Portfolio Overview":
         st.markdown(f"**P/L %:** {pnl_pct:+.2f}%")
         st.markdown(f"**Sharpe Ratio:** {sharpe:,.2f}")
 
-    # Portfolio composition & sector breakdown
+    # Composition & sector breakdown
     c1, c2 = st.columns(2)
     with c1:
         st.subheader("Composition")
@@ -129,8 +129,9 @@ elif page == "Portfolio Overview":
     with c2:
         st.subheader("Sector Breakdown")
         sectors = {t: yf.Ticker(t).info.get('sector','Unknown') for t in df['Ticker']}
-        sec_vals = {s: 0 for s in set(sectors.values())}
-        for t,s in sectors.items(): sec_vals[s] += df.loc[df['Ticker']==t, 'Current Value'].iloc[0]
+        sec_vals = {}
+        for t, s in sectors.items():
+            sec_vals[s] = sec_vals.get(s, 0) + df.loc[df['Ticker']==t, 'Current Value'].iloc[0]
         sec_df = pd.DataFrame.from_dict(sec_vals, orient='index', columns=['Value'])
         sec_df['%'] = sec_df['Value'] / sec_df['Value'].sum()
         fig2, ax2 = plt.subplots(figsize=(3,3))
