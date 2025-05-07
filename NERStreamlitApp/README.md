@@ -3,15 +3,11 @@
 This Streamlit app lets users explore Named Entity Recognition (NER) using the spaCy NLP library. It combines spaCy’s pretrained statistical NER model with a rule-based `EntityRuler`, allowing users to input or upload custom text, define their own entity patterns, and instantly view highlighted entities. The app requires no coding and enables real-time visualization using spaCy’s `displaCy` tool. This project demonstrates how rule-based and statistical NLP techniques can work together to provide flexible, explainable entity recognition.
 
 ## Instructions
-Install the necessary libraries and packages like spaCy, streamlit and pandas.
+- Do `pip install -r requirements.txt`
 
-Make sure everything is upgraded as well.
+- Then `streamlit run My_Streamlit_App.py`
 
-Download "python -m spacy download en_core_web_sm" for spaCy's English model.
-
-Streamlit run app.py
-
-https://rankel-python-portfolio-fjaypphs96jea4q6tqqclo.streamlit.app/
+- View deployed app: https://rankel-python-portfolio-fjaypphs96jea4q6tqqclo.streamlit.app/
 ## App Features
 **Flexible Text Input**: Upload, paste or type any text you'd like to analyze.
 
