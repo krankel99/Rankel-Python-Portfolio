@@ -7,7 +7,11 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from transformers import pipeline
 
 # Initialize transformer pipeline
-t_sent = pipeline('sentiment-analysis')
+t_sent = pipeline(
+    "sentiment-analysis",
+    model="nlptown/bert-base-multilingual-uncased-sentiment",  # ~100 MB vs. 250+ MB
+    device=-1
+)
 # Streamlit configuration
 
 st.set_page_config(page_title="Portfolio Analyzer", layout="wide")
