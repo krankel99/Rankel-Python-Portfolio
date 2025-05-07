@@ -6,5 +6,5 @@ transformers==4.51.3
 vaderSentiment==3.3.2
 vaderSentiment==3.3.2
 yfinance==0.2.56
-tensorflow
+tensorflow-cpu==2.10.0
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
