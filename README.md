@@ -1,10 +1,8 @@
 # Projects
-## [Basketball Stats](https://github.com/krankel99/Rankel-Python-Portfolio/blob/main/basic-streamlit-app/main.py)
+## [Basketball Stats](https://github.com/krankel99/Rankel-Python-Portfolio/tree/main/basic-streamlit-app)
 Under basic-streamlit-app is a file called main.py which contains basketball stats for players from the 1996 season until the 2022 season. In this project, I worked with cleaning the data by converting height and weight from centimeters and kilograms into inches and pounds respectively. In doing so, I was able to interpret the data clearer. I created different filters like one for different seasons and one for different teams so one could analyze the data based on each of these factors. I created two visualizations that change based on the filter as well which are the points per game for the season and the average number of points per age.
-- [https://github.com/krankel99/Rankel-Python-Portfolio/blob/main/basic-streamlit-app/main.py]
-## Olympic Medal Count for the 2008 Olympics
+## [Olympic Medal Count for the 2008 Olympics](https://github.com/krankel99/Rankel-Python-Portfolio/tree/main/TidyData-Project)
 Under TidyData-Project is a filed called tidy_data_project which contains the count for olympic medals from the 2008 Olympics in Beijing. In this project, I worked with cleaning up data including dropping NaN values, melting data from "wide" into "long" format, and splitting columns. I show two visualizations, a barplot that shows the top 10 medal breakdown by sports and a pie chart that shows the breakdown of medals by gender. This how complemented my overall portfolio as it shows that I am able to transform data and clean it up so I can create visualizations with it which is extremely useful in the real world. 
-- [https://github.com/krankel99/Rankel-Python-Portfolio/tree/main/TidyData-Project](url)
-## NER Custom Application
+## [NER Custom Application](https://github.com/krankel99/Rankel-Python-Portfolio/tree/main/NERStreamlitApp)
 Under NERStreamlit_App there is a file called My_Streamlit_App.py which contains a Streamlit app for exploring Named Entity Recognition. In this project, I combined spaCy's pretrained statistical NER (en_core_web_sm) with a rule-based EntityRuler so users can upload a text file or past text, define custom entity labels and patterns on the fly, and immediately see entities highlighted inline via spaCy's displaCy visualizer. Custom patterns persist across interactions using Streamlit's session_state, showcasing skills in NLP pipelin customization, interactive UI design, and real-time visualization.
-- [https://github.com/krankel99/Rankel-Python-Portfolio/tree/main/NERStreamlitApp](url)
+## [Portfolio Analyzer](https://github.com/krankel99/Rankel-Python-Portfolio/tree/main/StreamlitAppFinal)
