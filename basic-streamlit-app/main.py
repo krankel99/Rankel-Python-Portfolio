@@ -6,7 +6,7 @@ st.title('Basketball Points App')
 st.write("This app shows the player's information from the 1996 season to the 2022 season.")
 
 # Read CSV file containing player data
-df = pd.read_csv("/Users/kevin/OneDrive/Documents/Rankel-Python-Project/basic-streamlit-app/data/all_seasons.csv")
+df = pd.read_csv(r"C:\Users\kevin\OneDrive\Documents\Rankel-Python-Project\basic-streamlit-app\all_seasons.csv")
 
 # Display the entire dataframe for an initial overview
 st.dataframe(df)
