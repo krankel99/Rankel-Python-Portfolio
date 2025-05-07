@@ -185,25 +185,6 @@ Apple (AAPL) is slated to report...
 """
     st.markdown("Please input text from recent earnings calls or news articles about the stock/company.")
     content=st.text_area("Text", value=default_text, height=300)
-    # Rule-based
-    if 'custom_lex' not in st.session_state:
-        st.session_state['custom_lex']={'good':1,'great':2,'excellent':3,'bad':-2,'poor':-3,'terrible':-5}
-    st.subheader("Rule-based Analysis")
-    st.markdown("**Current Rules:**")
-    if st.session_state['custom_lex']:
-        for w,s in st.session_state['custom_lex'].items(): st.write(f"- {w}: {s}")
-    else:
-        st.write("(No custom rules)")
-    nw_col,ns_col=st.columns(2)
-    nw=nw_col.text_input("Add word"); ns=ns_col.number_input("Score",value=0)
-    if st.button("Add Rule") and nw: st.session_state['custom_lex'][nw.lower()]=ns; st.success(f"Added: {nw.lower()}={ns}")
-    if st.button("Clear Rules"): st.session_state['custom_lex']={}; st.warning("Cleared rules")
-    rs=sum(st.session_state['custom_lex'].get(w,0) for w in content.lower().split())
-    st.success(f"Rule Score: {rs}") if rs>0 else st.error(f"Rule Score: {rs}") if rs<0 else st.info(f"Rule Score: {rs}")
-    # VADER
-    st.subheader("VADER Analysis")
-    sid=SentimentIntensityAnalyzer(); vs=sid.polarity_scores(content); c=vs['compound']
-    st.success(f"VADER: {c:.2f}") if c>=0.05 else st.error(f"VADER: {c:.2f}") if c<=-0.05 else st.info(f"VADER: {c:.2f}")
     # Transformer
     st.subheader("Transformer Analysis")
     if has_transformer:
