@@ -4,6 +4,7 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import numpy as np
 from transformers import pipeline
+import tensorflow
 
 # Streamlit UI configuration and CSS adjustments
 st.set_page_config(page_title="Portfolio Analyzer", layout="wide")
