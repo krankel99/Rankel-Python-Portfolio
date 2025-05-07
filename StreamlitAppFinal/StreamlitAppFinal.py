@@ -7,12 +7,28 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from transformers import pipeline
 
 # Initialize transformer pipeline
+# Attempt to initialize transformer pipeline; disable if unavailable
+HAS_PIPELINE = True
+try:
+    t_sent = pipeline("sentiment-analysis")
+except Exception as _:
+    HAS_PIPELINE = False
+    t_sent = None
+
+# Initialize transformer pipeline with alternative model to avoid meta tensor error
 t_sent = pipeline(
-    "sentiment-analysis",
-    framework="tf",      # force TensorFlow
-    model="distilbert-base-uncased-finetuned-sst-2-english",
-    tokenizer="distilbert-base-uncased-finetuned-sst-2-english"
+    'sentiment-analysis',
+    model='nlptown/bert-base-multilingual-uncased-sentiment',
+    tokenizer='nlptown/bert-base-multilingual-uncased-sentiment',
+    device=-1
 )
+t_sent = pipeline(
+    'sentiment-analysis',
+    model='distilbert-base-uncased-finetuned-sst-2-english',
+    tokenizer='distilbert-base-uncased-finetuned-sst-2-english',
+    device=-1
+)
+
 # Streamlit configuration
 
 st.set_page_config(page_title="Portfolio Analyzer", layout="wide")
