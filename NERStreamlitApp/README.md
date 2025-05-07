@@ -25,11 +25,11 @@ Streamlit run app.py
 ### References
 SpaCy Library Architect: https://spacy.io/api
 
-The Basics of spaCy: [https://spacy.pythonhumanities.com/01_01_install_and_containers.html](url)
+The Basics of spaCy: https://spacy.pythonhumanities.com/01_01_install_and_containers.html
 
-SpaCy and its Linguistic Annotations: [https://spacy.pythonhumanities.com/01_02_linguistic_annotations.html](url)
+SpaCy and its Linguistic Annotations: https://spacy.pythonhumanities.com/01_02_linguistic_annotations.html
 
-Using SpaCy's EntityRuler: [https://spacy.pythonhumanities.com/02_01_entityruler.html](url)
+Using SpaCy's EntityRuler: https://spacy.pythonhumanities.com/02_01_entityruler.html
 ### Visual Examples
 ![image](https://github.com/user-attachments/assets/488f072e-dddc-45e5-afc0-a940a82f82eb)
 
