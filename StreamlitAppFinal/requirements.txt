@@ -6,4 +6,4 @@ transformers==4.51.3
 vaderSentiment==3.3.2
 vaderSentiment==3.3.2
 yfinance==0.2.56
-tensorflow-cpu=>2.16.1
+tensorflow-cpu>=2.16.1
