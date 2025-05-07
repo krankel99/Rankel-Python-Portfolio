@@ -4,14 +4,17 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import numpy as np
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from transformers import pipeline
 
 # Initialize transformer pipeline
+t_sent = None
+has_transformer = False
 try:
-    t_sent = pipeline("sentiment-analysis")
+    from transformers import pipeline
+    t_sent = pipeline('sentiment-analysis')
     has_transformer = True
 except Exception:
     has_transformer = False
+
 
 
 # Streamlit configuration
@@ -256,9 +259,15 @@ In this section, we use a transformer‑based model for [sentiment analysis](htt
 > **Note:** Transformer‑based methods often demand more memory and compute than simpler rule‑based or lexicon‑driven approaches, so performance may vary depending on your environment and text length.  
 """)
     # Use preinitialized pipeline t_sent
-    tr = t_sent(content, truncation=True)[0]
-    tr_score = tr['score']
-    if tr['label'] == 'POSITIVE':
-        st.success(f"Transformer ({tr['label']}): {tr_score:.2f}")
+    #tr = t_sent(content, truncation=True)[0]
+    #tr_score = tr['score']
+    #if tr['label'] == 'POSITIVE':
+     #   st.success(f"Transformer ({tr['label']}): {tr_score:.2f}")
+    #else:
+     #   st.error(f"Transformer ({tr['label']}): {tr_score:.2f}")
+    st.subheader("Transformer-Based Sentiment Analysis")
+    if has_transformer:
+        tr=t_sent(content, truncation=True)[0];label,score=tr['label'],tr['score']
+        st.success(f"{label} ({score:.2f})") if label=='POSITIVE' else st.error(f"{label} ({score:.2f})")
     else:
-        st.error(f"Transformer ({tr['label']}): {tr_score:.2f}")
+        st.warning("Transformer model unavailable – no PyTorch/TF backend installed.")
