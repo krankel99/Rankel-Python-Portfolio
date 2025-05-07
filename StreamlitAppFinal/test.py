@@ -89,11 +89,11 @@ if page == "Homepage":
 elif page == "Portfolio Overview":
     st.header("Portfolio Overview")
     df = st.session_state['portfolio_df']
-    # Key metrics
+    # Metrics calculations
     total_cost = df['Cost Basis'].sum()
     total_value = df['Current Value'].sum()
     pnl_pct = ((total_value - total_cost) / total_cost) * 100 if total_cost else 0
-    # Sharpe Ratio
+    # Sharpe ratio
     price_hist = pd.DataFrame({t: yf.Ticker(t).history(period='1y')['Close'] for t in df['Ticker']})
     returns = price_hist.pct_change().dropna()
     weights = df['Current Value'] / total_value
@@ -190,3 +190,4 @@ Apple (AAPL) is slated to report fiscal second-quarter results after the market 
             st.error(f"{label} ({score:.2f})")
     except Exception as e:
         st.warning("Transformer analysis unavailable. " + str(e))
+
