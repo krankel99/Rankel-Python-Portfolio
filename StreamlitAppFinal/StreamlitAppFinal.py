@@ -9,8 +9,9 @@ from transformers import pipeline
 # Initialize transformer pipeline
 t_sent = pipeline(
     "sentiment-analysis",
-    model="nlptown/bert-base-multilingual-uncased-sentiment",  # ~100 MB vs. 250+ MB
-    device=-1
+    framework="tf",      # force TensorFlow
+    model="distilbert-base-uncased-finetuned-sst-2-english",
+    tokenizer="distilbert-base-uncased-finetuned-sst-2-english"
 )
 # Streamlit configuration
 
