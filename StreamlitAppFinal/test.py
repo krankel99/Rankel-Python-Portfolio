@@ -49,6 +49,19 @@ if 'portfolio_df' not in st.session_state:
 dpages = ["Homepage", "Portfolio Overview", "Stock Charts", "Portfolio vs S&P 500", "Sentiment Analysis"]
 page = st.sidebar.radio("Navigate to", dpages)
 
+# Initialize transformer pipeline for Sentiment (explicit TensorFlow backend)
+has_transformer = False
+try:
+    t_sent = pipeline(
+        'sentiment-analysis',
+        model='distilbert-base-uncased-finetuned-sst-2-english',
+        tokenizer='distilbert-base-uncased-finetuned-sst-2-english',
+        framework='tf'
+    )
+    has_transformer = True
+except Exception:
+    has_transformer = False
+
 # --- Homepage ---
 if page == "Homepage":
     st.header("Portfolio Analyzer")
