@@ -23,7 +23,7 @@ Streamlit run app.py
 
 **Clear and Reusable**: Easily clear all patterns and try new ones all with the push of a button.
 ### References
-SpaCy Library Architect: ([https://spacy.io/api])
+SpaCy Library Architect: https://spacy.io/api
 
 The Basics of spaCy: [https://spacy.pythonhumanities.com/01_01_install_and_containers.html](url)
 
