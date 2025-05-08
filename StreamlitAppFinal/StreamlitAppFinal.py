@@ -3,19 +3,25 @@ import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
 import numpy as np
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from transformers import pipeline
-import time
 
-t_sent = pipeline(
-    "sentiment-analysis",
-    model="distilbert-base-uncased-finetuned-sst-2-english",
-    framework="pt",
-    device=-1    # -1 means “CPU only”
-)
+# Initialize transformer pipeline once (cached)
+@st.cache_resource(show_spinner=False)
+def load_transformer():
+    return pipeline(
+        "sentiment-analysis",
+        model="distilbert-base-uncased-finetuned-sst-2-english",
+        framework="pt",    # force PyTorch backend to avoid TF/Keras issues
+        device=-1            # CPU only
+    )
+
+# Load pipeline safely
+try:
+    t_sent = load_transformer()
+except Exception:
+    t_sent = None
 
 # Streamlit configuration
-
 st.set_page_config(page_title="Portfolio Analyzer", layout="wide")
 st.markdown(
     """
@@ -30,6 +36,7 @@ st.markdown(
     .stMarkdown h3 { font-size: 28px !important; }
     </style>
     """, unsafe_allow_html=True)
+
 # Helper to fetch current prices and cache
 @st.cache_data(ttl=900)
 def fetch_prices(tickers):
@@ -44,7 +51,7 @@ def fetch_prices(tickers):
                 if attempt == 2:
                     prices[t] = np.nan
                 else:
-                    time.sleep(1)
+                    continue
     return prices
 
 # Setting up default portfolio
@@ -62,26 +69,19 @@ if 'portfolio_df' not in st.session_state:
     df0['Profit/Loss (%)'] = df0['Profit/Loss ($)'] / df0['Cost Basis'] * 100
     st.session_state['portfolio_df'] = df0.dropna(subset=['Current Price'])
 
-
-# Sidebar
-pages = [
-    "Homepage",
-    "Portfolio Overview",
-    "Stock Charts",
-    "Portfolio vs S&P 500",
-    "Sentiment Analysis"
-]
+# Sidebar navigation\
+pages = ["Homepage", "Portfolio Overview", "Stock Charts", "Portfolio vs S&P 500", "Sentiment Analysis"]
 page = st.sidebar.radio("Navigate to", pages)
-
 
 # Homepage
 if page == "Homepage":
     st.header("Homepage")
-    st.markdown("Welcome to Portfolio Analyzer, your all‑in‑one financial dashboard! " \
-    "Here you can easily upload or type in your stock portfolio to see real‑time valuations, performance metrics (like total invested, current value, P/L %, and Sharpe ratio), "
-    "and visual breakdowns by position and sector. Dive deeper with interactive price charts for individual holdings or compare your portfolio’s cumulative return against the S&P 500. " \
-    "Finally, switch to Sentiment Analysis to gauge market mood—enter recent earnings call transcripts or news articles and get quick transformer‑based sentiment scores. " \
-    "Whether you’re tracking your long‑term investments or testing a new trading idea, Portfolio Analyzer gives you the insights you need—all in one simple app.")
+    st.markdown(
+        "Welcome to Portfolio Analyzer, your all‑in‑one financial dashboard! "
+        "Here you can easily upload or type in your stock portfolio to see real‑time valuations, performance metrics (like total invested, current value, P/L %, and Sharpe ratio), "
+        "and visual breakdowns by position and sector. Dive deeper with interactive price charts for individual holdings or compare your portfolio’s cumulative return against the S&P 500. "
+        "Finally, switch to Sentiment Analysis to gauge market mood—enter recent earnings call transcripts or news articles and get quick transformer‑based sentiment scores. "
+        "Whether you’re tracking your long‑term investments or testing a new trading idea, Portfolio Analyzer gives you the insights you need—all in one simple app.")
     st.subheader('Upload or Enter Your Portfolio')
     method = st.selectbox("Input method", ["Upload CSV", "Type Manually"])
     df = None
@@ -109,12 +109,10 @@ if page == "Homepage":
         else:
             st.error("Columns must be Ticker, Quantity, Purchase Price.")
 
-
-# Portfolio Overview Page
+# Portfolio Overview
 elif page == "Portfolio Overview":
     st.header("Portfolio Overview")
     df = st.session_state['portfolio_df']
-    # Layout: holdings table and metrics
     table_col, metrics_col = st.columns([3,1])
     with table_col:
         st.subheader("Holdings")
@@ -128,14 +126,12 @@ elif page == "Portfolio Overview":
         }))
     with metrics_col:
         st.subheader("Metrics & Definitions")
-        # Definitions
         defs = [
             ("Invested", "Total cost basis of your portfolio."),
             ("Value", "Current market value of your holdings."),
             ("P/L %", "Percentage gain or loss from your investment."),
             ("Sharpe Ratio", "How much return you are getting relative to the risk. 1 is considered acceptable, but you want higher.")
         ]
-        # Calculate values
         invested = df['Cost Basis'].sum()
         current_val = df['Current Value'].sum()
         pnl_pct = (current_val - invested) / invested * 100 if invested else 0
@@ -145,56 +141,49 @@ elif page == "Portfolio Overview":
         port_ret = (ret * weights.values).sum(axis=1)
         sharpe = (port_ret.mean() / port_ret.std()) * np.sqrt(252)
         vals = [invested, current_val, pnl_pct, sharpe]
-
-        # Display definitions and values
+        
         for (label, desc), val in zip(defs, vals):
             st.markdown(f"<p style='font-size:16px; margin:2px'><strong>{label}</strong>: {desc}</p>", unsafe_allow_html=True)
             suffix = "%" if label == "P/L %" else ""
             display_val = f"{val:,.2f}{suffix}"
             st.markdown(f"<p style='font-size:24px; margin-bottom:12px'><strong>{display_val}</strong></p>", unsafe_allow_html=True)
-
     # Charts
     comp_col, sec_col = st.columns(2)
     with comp_col:
         st.subheader("Portfolio Composition")
-        st.markdown("Each slice shows weight by current value.")
+        st.markdown("Each slice shows weight by current value.")    
         fig, ax = plt.subplots(figsize=(3,3))
         ax.pie(df['Current Value'], labels=df['Ticker'], autopct='%1.1f%%', startangle=90)
         ax.axis('equal')
         st.pyplot(fig)
-
     with sec_col:
         st.subheader("Sector Breakdown")
         st.markdown("Diversification across sectors.")
-        sectors = {t: yf.Ticker(t).info.get('sector', 'Unknown') for t in df['Ticker']}
+        sectors = {t: yf.Ticker(t).info.get('sector','Unknown') for t in df['Ticker']}
         sec_vals = {}
-        for t, s in sectors.items():
-            sec_vals[s] = sec_vals.get(s, 0) + df.loc[df['Ticker'] == t, 'Current Value'].iloc[0]
-        sec_df = pd.DataFrame.from_dict(sec_vals, orient='index', columns=['Value'])
-        sec_df['%'] = sec_df['Value'] / sec_df['Value'].sum()
-        colors = plt.cm.tab20.colors[:len(sec_df)]
-        fig2, ax2 = plt.subplots(figsize=(3,3))
+        for t,s in sectors.items(): sec_vals[s]=sec_vals.get(s,0)+df.loc[df['Ticker']==t,'Current Value'].iloc[0]
+        sec_df=pd.DataFrame.from_dict(sec_vals,orient='index',columns=['Value'])
+        sec_df['%']=sec_df['Value']/sec_df['Value'].sum()
+        colors=plt.cm.tab20.colors[:len(sec_df)]
+        fig2,ax2=plt.subplots(figsize=(3,3))
         ax2.pie(sec_df['Value'], labels=sec_df.index, autopct='%1.1f%%', startangle=90, colors=colors)
-        ax2.axis('equal')
-        st.pyplot(fig2)
-
+        ax2.axis('equal'); st.pyplot(fig2)
     # Beta Metrics
     st.subheader("Beta Metrics (5y monthly)")
     st.markdown("Beta measures sensitivity of a stock to the S&P 500 (1 is the market volatility).")
-    market = yf.Ticker('^GSPC').history(period='5y', interval='1mo')['Close']
+    market = yf.Ticker('^GSPC').history(period='5y',interval='1mo')['Close']
     mret = market.pct_change().dropna()
     betas = {}
-    for i, t in enumerate(df['Ticker']):
-        sp = yf.Ticker(t).history(period='5y', interval='1mo')['Close']
+    for i,t in enumerate(df['Ticker']):
+        sp = yf.Ticker(t).history(period='5y',interval='1mo')['Close']
         sret = sp.pct_change().dropna()
-        betas[t] = round(sret.cov(mret) / mret.var(), 2)
-
-    port_beta = round(sum(betas[t] * weights.iloc[i] for i, t in enumerate(df['Ticker'])), 2)
-    beta_df = pd.DataFrame.from_dict(betas, orient='index', columns=['Beta'])
-    beta_df.loc['Portfolio'] = port_beta
+        betas[t] = round(sret.cov(mret)/mret.var(),2)
+    port_beta = round(sum(betas[t]*weights.iloc[i] for i,t in enumerate(df['Ticker'])),2)
+    beta_df=pd.DataFrame.from_dict(betas,orient='index',columns=['Beta'])
+    beta_df.loc['Portfolio']=port_beta
     st.dataframe(beta_df)
 
-# Stock Charts Page
+# Stock Charts
 elif page == "Stock Charts":
     st.header("Stock Charts")
     df = st.session_state['portfolio_df']
@@ -210,26 +199,22 @@ elif page == "Stock Charts":
     plt.tight_layout()
     st.pyplot(fig)
 
-
-# Portfolio vs S&P 500 Page
+# Portfolio vs S&P 500
 elif page == "Portfolio vs S&P 500":
     st.header("Portfolio vs S&P 500")
-    st.markdown("This graph shows your portfolio's returns in comparison to the S&P 500's returns.")
+    st.markdown("This graph shows your portfolio's returns in comparison to the S&P 500.")
     df = st.session_state['portfolio_df']
-    weights = df['Current Value'] / df['Current Value'].sum()
-    comb = pd.DataFrame({t: yf.Ticker(t).history(period='6mo')['Close'] for t in df['Ticker']})
-    port = (comb.pct_change() * weights.values).sum(axis=1).add(1).cumprod()
+    weights = df['Current Value']/df['Current Value'].sum()
+    comb = pd.DataFrame({t:yf.Ticker(t).history(period='6mo')['Close'] for t in df['Ticker']})
+    port = (comb.pct_change()*weights.values).sum(axis=1).add(1).cumprod()
     sp = yf.Ticker('^GSPC').history(period='6mo')['Close']
     sp_val = sp.pct_change().add(1).cumprod()
-    fig, ax = plt.subplots()
-    ax.plot(port, label='Portfolio')
-    ax.plot(sp_val, label='S&P 500')
-    ax.legend()
-    st.pyplot(fig)
+    fig,ax = plt.subplots()
+    ax.plot(port,label='Portfolio')
+    ax.plot(sp_val,label='S&P 500')
+    ax.legend(); st.pyplot(fig)
 
-
-
-# Sentiment Analysis Page
+# Sentiment Analysis
 elif page == "Sentiment Analysis":
     st.header("Sentiment Analysis")
     default_text = """
@@ -245,9 +230,6 @@ Of the 15 analysts covering Apple tracked by Visible Alpha, nine have a “buy�
     txt = st.text_area("Please input text from a recent earnings call transcript or other articles, such as news about the stock or company.", value=default_text, height=300)
     content = txt
 
-
-
-    # Transformer Analysis
     st.subheader("Transformer-Based Sentiment Analysis")
     st.markdown("""
 
@@ -260,11 +242,14 @@ In this section, we use a transformer‑based model for [sentiment analysis](htt
 
 > **Note:** Transformer‑based methods often demand more memory and compute than simpler rule‑based or lexicon‑driven approaches, so performance may vary depending on your environment and text length.  
 """)
-    # Use preinitialized pipeline t_sent
-tr = t_sent(content, truncation=True)[0]
-score = tr["score"]
-label = tr["label"]
-if label == "POSITIVE":
-    st.success(f"{label} ({score:.2f})")
-else:
-    st.error(f"{label} ({score:.2f})")
+    if t_sent:
+        try:
+            tr = t_sent(content, truncation=True)[0]
+            if tr['label'] == 'POSITIVE':
+                st.success(f"{tr['label']} ({tr['score']:.2f})")
+            else:
+                st.error(f"{tr['label']} ({tr['score']:.2f})")
+        except Exception:
+            st.error("Transformer analysis failed. Please try again later.")
+    else:
+        st.warning("Transformer model unavailable.")
