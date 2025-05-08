@@ -1,8 +1,7 @@
-matplotlib==3.10.1
-numpy>=1.26.0,<2.2.0
-pandas==2.2.3
-streamlit==1.41.1
-transformers==4.51.3
-vaderSentiment==3.3.2
-yfinance==0.2.56
+streamlit>=1.41.1
+pandas>=2.2
+numpy>=1.23,<2.0
+matplotlib>=3.10
+yfinance>=0.2.56
+transformers>=4.51.3
 tensorflow-cpu>=2.16.1
