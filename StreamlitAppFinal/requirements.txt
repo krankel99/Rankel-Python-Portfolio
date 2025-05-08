@@ -4,4 +4,4 @@ numpy>=1.23,<2.0
 matplotlib>=3.10
 yfinance>=0.2.56
 transformers>=4.51.3
-tensorflow-cpu>=2.16.1
+torch>=2.0.0

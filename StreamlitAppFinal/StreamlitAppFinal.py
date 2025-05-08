@@ -7,19 +7,13 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from transformers import pipeline
 import time
 
-# Initialize transformer pipeline
-@st.cache_resource(show_spinner=False)
-def load_transformer():
-    # explicitly name the model to avoid “defaulted to …” warnings
-    return pipeline(
-        "sentiment-analysis",
-        model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
-        framework="tf",      # force TensorFlow backend
-        device=-1            # CPU only
-    )
+t_sent = pipeline(
+    "sentiment-analysis",
+    model="distilbert-base-uncased-finetuned-sst-2-english",
+    framework="pt",
+    device=-1    # -1 means “CPU only”
+)
 
-# at the top of your script, after imports:
-t_sent = load_transformer()
 # Streamlit configuration
 
 st.set_page_config(page_title="Portfolio Analyzer", layout="wide")
