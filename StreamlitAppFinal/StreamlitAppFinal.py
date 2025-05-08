@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from transformers import pipeline
 
-# Initialize transformer pipeline once (cached)
+# Initialize transformer pipeline once (cached) to avoid re-loading on every rerun which was causing issues
 @st.cache_resource(show_spinner=False)
 def load_transformer():
+    # load the hugging face sentiment-analysis pipeline with DistilBert via PyTorch backend
     return pipeline(
         "sentiment-analysis",
         model="distilbert-base-uncased-finetuned-sst-2-english",
@@ -15,14 +16,15 @@ def load_transformer():
         device=-1            # CPU only
     )
 
-# Load pipeline safely
+# Attempt to load the pipeline safely
 try:
     t_sent = load_transformer()
 except Exception:
     t_sent = None
 
-# Streamlit configuration
+# Streamlit page configuration
 st.set_page_config(page_title="Portfolio Analyzer", layout="wide")
+# this is just to make the fonts bigger
 st.markdown(
     """
     <style>
@@ -37,10 +39,11 @@ st.markdown(
     </style>
     """, unsafe_allow_html=True)
 
-# Helper to fetch current prices and cache
+# Helper function to fetch current prices and cache
 @st.cache_data(ttl=900)
 def fetch_prices(tickers):
     prices = {}
+    # attempt up to 3 times per ticker to handle transient network errors
     for t in tickers:
         for attempt in range(3):
             try:
@@ -49,7 +52,7 @@ def fetch_prices(tickers):
                 break
             except Exception:
                 if attempt == 2:
-                    prices[t] = np.nan
+                    prices[t] = np.nan # fallback to Nan on final failure
                 else:
                     continue
     return prices
@@ -63,6 +66,7 @@ if 'portfolio_df' not in st.session_state:
     })
     prices0 = fetch_prices(df0['Ticker'].tolist())
     df0['Current Price'] = df0['Ticker'].map(prices0)
+    # compute metrics for the page
     df0['Current Value'] = df0['Quantity'] * df0['Current Price']
     df0['Cost Basis'] = df0['Quantity'] * df0['Purchase Price']
     df0['Profit/Loss ($)'] = df0['Current Value'] - df0['Cost Basis']
@@ -88,10 +92,11 @@ if page == "Homepage":
     if method == "Upload CSV":
         f = st.file_uploader("CSV file", type="csv")
         if f:
-            df = pd.read_csv(f)
+            df = pd.read_csv(f) # read uploaded file
     else:
         txt = st.text_area("Lines as: Ticker,Quantity,Purchase Price")
         if txt:
+            # this is to split into lines manually
             rows = [ln.split(',') for ln in txt.splitlines() if ln.strip()]
             df = pd.DataFrame(rows, columns=["Ticker", "Quantity", "Purchase Price"])
             df['Quantity'] = pd.to_numeric(df['Quantity'], errors='coerce')
@@ -112,10 +117,11 @@ if page == "Homepage":
 # Portfolio Overview
 elif page == "Portfolio Overview":
     st.header("Portfolio Overview")
-    df = st.session_state['portfolio_df']
+    df = st.session_state['portfolio_df'] # load from session
     table_col, metrics_col = st.columns([3,1])
     with table_col:
         st.subheader("Holdings")
+        # display holdings with formatted currency and percentages
         st.dataframe(df.style.format({
             'Purchase Price': '${:,.2f}',
             'Current Price': '${:,.2f}',
@@ -126,6 +132,7 @@ elif page == "Portfolio Overview":
         }))
     with metrics_col:
         st.subheader("Metrics & Definitions")
+        # define the metrics I am using for a better user experience
         defs = [
             ("Invested", "Total cost basis of your portfolio."),
             ("Value", "Current market value of your holdings."),
@@ -139,7 +146,7 @@ elif page == "Portfolio Overview":
         ret = hist.pct_change().dropna()
         weights = df['Current Value'] / current_val
         port_ret = (ret * weights.values).sum(axis=1)
-        sharpe = (port_ret.mean() / port_ret.std()) * np.sqrt(252)
+        sharpe = (port_ret.mean() / port_ret.std()) * np.sqrt(252) # annualized Sharpe
         vals = [invested, current_val, pnl_pct, sharpe]
         
         for (label, desc), val in zip(defs, vals):
@@ -149,6 +156,7 @@ elif page == "Portfolio Overview":
             st.markdown(f"<p style='font-size:24px; margin-bottom:12px'><strong>{display_val}</strong></p>", unsafe_allow_html=True)
     # Charts
     comp_col, sec_col = st.columns(2)
+    # both of these are my visualizations, both pie charts
     with comp_col:
         st.subheader("Portfolio Composition")
         st.markdown("Each slice shows weight by current value.")    
@@ -171,6 +179,7 @@ elif page == "Portfolio Overview":
     # Beta Metrics
     st.subheader("Beta Metrics (5y monthly)")
     st.markdown("Beta measures sensitivity of a stock to the S&P 500 (1 is the market volatility).")
+    # this is just used to calculate beta, nothing overly complex here
     market = yf.Ticker('^GSPC').history(period='5y',interval='1mo')['Close']
     mret = market.pct_change().dropna()
     betas = {}
@@ -186,6 +195,7 @@ elif page == "Portfolio Overview":
 # Stock Charts
 elif page == "Stock Charts":
     st.header("Stock Charts")
+    # this is for stock charts, so users can display each individual stock and their history with different times
     df = st.session_state['portfolio_df']
     ticker = st.selectbox("Select Ticker", df['Ticker'].tolist())
     period = st.selectbox("Select Time Range", ["1mo","3mo","6mo","1y"])
@@ -203,6 +213,7 @@ elif page == "Stock Charts":
 elif page == "Portfolio vs S&P 500":
     st.header("Portfolio vs S&P 500")
     st.markdown("This graph shows your portfolio's returns in comparison to the S&P 500.")
+    # this compares the portfolio history to the market
     df = st.session_state['portfolio_df']
     weights = df['Current Value']/df['Current Value'].sum()
     comb = pd.DataFrame({t:yf.Ticker(t).history(period='6mo')['Close'] for t in df['Ticker']})
@@ -242,9 +253,11 @@ In this section, we use a transformer‑based model for [sentiment analysis](htt
 
 > **Note:** Transformer‑based methods often demand more memory and compute than simpler rule‑based or lexicon‑driven approaches, so performance may vary depending on your environment and text length.  
 """)
+    # just basic transformer analysis, threw it in a if-else loop and a try loop because I was having problems running it and this seems to work
+    # if the code doesn't work it will output two different error codes to help users know what the problem is
     if t_sent:
         try:
-            tr = t_sent(content, truncation=True)[0]
+            tr = t_sent(content, truncation=True)[0] # run inference
             if tr['label'] == 'POSITIVE':
                 st.success(f"{tr['label']} ({tr['score']:.2f})")
             else:
