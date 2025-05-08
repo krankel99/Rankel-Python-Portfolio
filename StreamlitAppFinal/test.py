@@ -76,7 +76,7 @@ page = st.sidebar.radio("Navigate to", pages)
 # ... rest of code remains unchanged, including Beta Metrics calculation
 
 # --- Sentiment Analysis ---
-elif page == "Sentiment Analysis":
+#elif page == "Sentiment Analysis":
     st.header("Sentiment Analysis")
     default_text = """
     Paste recent earnings call transcript or news about the company.
