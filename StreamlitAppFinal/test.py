@@ -69,7 +69,8 @@ if 'portfolio_df' not in st.session_state:
     df0['Profit/Loss (%)'] = df0['Profit/Loss ($)'] / df0['Cost Basis'] * 100
     st.session_state['portfolio_df'] = df0.dropna(subset=['Current Price'])
 
-# Sidebar navigation\pages = ["Homepage", "Portfolio Overview", "Stock Charts", "Portfolio vs S&P 500", "Sentiment Analysis"]
+# Sidebar navigation\
+pages = ["Homepage", "Portfolio Overview", "Stock Charts", "Portfolio vs S&P 500", "Sentiment Analysis"]
 page = st.sidebar.radio("Navigate to", pages)
 
 # Homepage
