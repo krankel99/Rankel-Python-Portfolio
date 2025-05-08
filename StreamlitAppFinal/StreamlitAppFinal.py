@@ -4,19 +4,22 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import numpy as np
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from transformers import pipeline
+import time
 
 # Initialize transformer pipeline
-t_sent = None
-has_transformer = False
-try:
-    from transformers import pipeline
-    t_sent = pipeline('sentiment-analysis')
-    has_transformer = True
-except Exception:
-    has_transformer = False
+@st.cache_resource(show_spinner=False)
+def load_transformer():
+    # explicitly name the model to avoid “defaulted to …” warnings
+    return pipeline(
+        "sentiment-analysis",
+        model="distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+        framework="tf",      # force TensorFlow backend
+        device=-1            # CPU only
+    )
 
-
-
+# at the top of your script, after imports:
+t_sent = load_transformer()
 # Streamlit configuration
 
 st.set_page_config(page_title="Portfolio Analyzer", layout="wide")
@@ -34,16 +37,21 @@ st.markdown(
     </style>
     """, unsafe_allow_html=True)
 # Helper to fetch current prices and cache
-@st.cache_data
+@st.cache_data(ttl=900)
 def fetch_prices(tickers):
     prices = {}
     for t in tickers:
-        try:
-            prices[t] = yf.Ticker(t).history(period='1d')['Close'].iloc[0]
-        except:
-            prices[t] = np.nan
+        for attempt in range(3):
+            try:
+                hist = yf.Ticker(t).history(period="1d", timeout=30)
+                prices[t] = hist["Close"].iloc[-1]
+                break
+            except Exception:
+                if attempt == 2:
+                    prices[t] = np.nan
+                else:
+                    time.sleep(1)
     return prices
-
 
 # Setting up default portfolio
 if 'portfolio_df' not in st.session_state:
@@ -259,15 +267,10 @@ In this section, we use a transformer‑based model for [sentiment analysis](htt
 > **Note:** Transformer‑based methods often demand more memory and compute than simpler rule‑based or lexicon‑driven approaches, so performance may vary depending on your environment and text length.  
 """)
     # Use preinitialized pipeline t_sent
-    #tr = t_sent(content, truncation=True)[0]
-    #tr_score = tr['score']
-    #if tr['label'] == 'POSITIVE':
-     #   st.success(f"Transformer ({tr['label']}): {tr_score:.2f}")
-    #else:
-     #   st.error(f"Transformer ({tr['label']}): {tr_score:.2f}")
-    st.subheader("Transformer-Based Sentiment Analysis")
-    if has_transformer:
-        tr=t_sent(content, truncation=True)[0];label,score=tr['label'],tr['score']
-        st.success(f"{label} ({score:.2f})") if label=='POSITIVE' else st.error(f"{label} ({score:.2f})")
-    else:
-        st.warning("Transformer model unavailable – no PyTorch/TF backend installed.")
+tr = t_sent(content, truncation=True)[0]
+score = tr["score"]
+label = tr["label"]
+if label == "POSITIVE":
+    st.success(f"{label} ({score:.2f})")
+else:
+    st.error(f"{label} ({score:.2f})")
