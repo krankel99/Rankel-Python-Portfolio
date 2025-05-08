@@ -7,7 +7,7 @@ Portfolio Analyzer helps investors and analysts quickly assess the health and pe
 - Do `pip install -r requirements.txt`
 
 - Then `streamlit run My_Streamlit_App.py`
-- 
+  
 - View deployed app: https://rankel-python-portfolio-diro957ngmif7w7zq6c8kr.streamlit.app/
 ## App Features
 ###  Homepage
